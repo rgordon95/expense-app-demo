@@ -1,12 +1,17 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import IconButton from "../components/ui/IconButton";
-import { GlobalStyles } from "../constants/styles";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import LoadingOverlay from "../components/ui/LoadingOverlay";
+import { GlobalStyles } from "../constants/styles";
 import { useContext } from "react";
 import { ExpensesContext } from "../store/expenses-context";
+import { deleteExpense, storeExpense, updateExpense } from "../utils/http";
 
 const ManageExpenseScreen = ({ route, navigation }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const editedExpenseId = route.params?.expenseId;
   const isEditing = !!editedExpenseId;
 
@@ -26,19 +31,52 @@ const ManageExpenseScreen = ({ route, navigation }) => {
     navigation.goBack();
   };
 
-  const confirmHandler = (expenseData) => {
+  const confirmHandler = async (expenseData) => {
     if (isEditing) {
-      expensesCtx.updateExpense(editedExpenseId, expenseData);
+      setIsLoading(true);
+      try {
+        await updateExpense(editedExpenseId, expenseData);
+        expensesCtx.updateExpense(editedExpenseId, expenseData);
+        navigation.goBack();
+      } catch (e) {
+        setError("Could not update expense. Please try again.");
+      }
     } else {
-      expensesCtx.addExpense(expenseData);
+      setIsLoading(true);
+      try {
+        const id = await storeExpense(expenseData);
+        expensesCtx.addExpense({ expenseData, id: id });
+        navigation.goBack();
+      } catch (e) {
+        setError("Could not add expense. Please try again.");
+      }
+      setIsLoading(false);
     }
-    navigation.goBack();
   };
 
-  const deleteExpenseHandler = () => {
-    expensesCtx.deleteExpense(editedExpenseId);
-    navigation.goBack();
+  const errorHandler = () => {
+    setError(null);
   };
+
+  const deleteExpenseHandler = async () => {
+    setIsLoading(true);
+    try {
+      await deleteExpense(editedExpenseId);
+      expensesCtx.deleteExpense(editedExpenseId);
+      navigation.goBack();
+    } catch (e) {
+      setError("Could not delete expense. Please try again.");
+    }
+    setIsLoading(false);
+  };
+
+  if (isLoading) {
+    return <LoadingOverlay />;
+  }
+
+  if (error && !isLoading) {
+    return <ErrorOverlay message={error} handler={errorHandler} />;
+  }
 
   return (
     <View style={styles.container}>

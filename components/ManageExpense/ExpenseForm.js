@@ -12,7 +12,7 @@ const ExpenseForm = ({ defaultValues, isEditing, onCancel, onSubmit }) => {
       isValid: true,
     },
     date: {
-      value: getFormattedDate(defaultValues?.date) || "",
+      value: defaultValues?.date ? getFormattedDate(defaultValues?.date) : "",
       isValid: true,
     },
     description: {
@@ -91,7 +91,7 @@ const ExpenseForm = ({ defaultValues, isEditing, onCancel, onSubmit }) => {
           extraStyles={styles.rowInput}
           textInputConfig={{
             onChangeText: inputChangedHandler.bind(this, "date"),
-            placeholder: "MM-DD-YYYY",
+            placeholder: "YYYY-MM-DD",
             maxLength: 10,
             returnKeyType: "done",
             value: inputs.date.value,

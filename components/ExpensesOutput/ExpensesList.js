@@ -1,7 +1,5 @@
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList } from "react-native";
 import ExpenseItem from "./ExpenseItem";
-
-import { GlobalStyles } from "../../constants/styles";
 
 const RenderExpenseItem = (itemData) => {
   return (
@@ -20,11 +18,3 @@ const ExpensesList = ({ expenses }) => {
 };
 
 export default ExpensesList;
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: GlobalStyles.colors.primary700,
-    flex: 1,
-    padding: 24,
-  },
-});
